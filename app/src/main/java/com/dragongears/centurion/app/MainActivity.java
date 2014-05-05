@@ -6,29 +6,23 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 
 public class MainActivity extends ActionBarActivity {
-    ImageView image;
     private BluetoothAdapter mBTAdapter;
     private BluetoothSocket mBTSocket;
     private BluetoothDevice mDevice;
@@ -137,9 +131,7 @@ public class MainActivity extends ActionBarActivity {
         protected BluetoothDevice doInBackground(Void... params) {
             BluetoothDevice dev = null;
             Set<BluetoothDevice> pairedDevices = mBTAdapter.getBondedDevices();
-            List<BluetoothDevice> listDevices = new ArrayList<BluetoothDevice>();
             for (BluetoothDevice device : pairedDevices) {
-                listDevices.add(device);
                 Log.e("Centurion", "Device: " + device.getName());
                 if (device.getName().contains("RN42-049C")) {
                     dev = device;
@@ -237,11 +229,11 @@ public class MainActivity extends ActionBarActivity {
             if (!mConnectSuccessful) {
                 img.setImageResource(R.drawable.ic_no_connection);
 
-                Toast.makeText(getApplicationContext(), "Could not connect to device. Is it a Serial device? Also check if the UUID is correct in the settings", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Could not connect to device. Is it a Serial device? Also check if the UUID is correct in the settings", Toast.LENGTH_LONG).show();
             } else {
                 img.setImageResource(R.drawable.ic_toast_up);
 
-                Toast.makeText(getApplicationContext(), "Connected to device", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Connected to device", Toast.LENGTH_LONG).show();
                 mIsBluetoothConnected = true;
                 mReadThread = new ReadInput(); // Kick off input reader
             }
