@@ -13,7 +13,8 @@
         android:id="@+id/toasterImageView"
         android:layout_centerHorizontal="true"
         android:src="@drawable/ic_no_connection"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="30dp" />
 
     <Button
         android:layout_width="wrap_content"
@@ -21,6 +22,7 @@
         android:text="Toast"
         android:id="@+id/toastButton"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp" />
 
 </RelativeLayout>
