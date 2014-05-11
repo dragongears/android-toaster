@@ -1,11 +1,5 @@
 package com.dragongears.centurion.app;
 
-import android.app.ProgressDialog;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -14,12 +8,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Set;
-import java.util.UUID;
 
 
 public class MainActivity extends ActionBarActivity {
