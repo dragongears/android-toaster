@@ -1,7 +1,6 @@
 package com.dragongears.centurion.app;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -9,10 +8,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,17 +25,15 @@ public class BluetoothSPP {
     private boolean mIsUserInitiatedDisconnect = false;
     private ReadInput mReadThread = null;
 
-    private Activity mActivity;
     private Handler mHandler;
-    private ProgressDialog progressDialog;
 
     private static final int BT_ENABLE_REQUEST = 10; // This is the code we use for BT Enable
-    public static final int BT_CONNECTED = 10;
-    public static final int BT_NOT_CONNECTED = 20;
-    public static final int BT_FROM_TOASTER = 30;
+    public static final int BT_CONNECTING = 10;
+    public static final int BT_CONNECTED = 20;
+    public static final int BT_NOT_CONNECTED = 30;
+    public static final int BT_FROM_TOASTER = 40;
 
     public void initialize(Activity act, Handler hnd) {
-        mActivity = act;
         mHandler = hnd;
         Log.e("Centurion", "Bluetooth getDefaultAdapter");
         mBTAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -48,7 +42,7 @@ public class BluetoothSPP {
             Log.e("Centurion", "Bluetooth not found");
         } else if (!mBTAdapter.isEnabled()) {
             Intent enableBT = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            mActivity.startActivityForResult(enableBT, BT_ENABLE_REQUEST);
+            act.startActivityForResult(enableBT, BT_ENABLE_REQUEST);
             Log.e("Centurion", "Getting paired devices");
         } else {
             new SearchDevices().execute();
@@ -161,7 +155,7 @@ public class BluetoothSPP {
         @Override
         protected void onPreExecute() {
             Log.e("Centurion", "Connecting...");
-            progressDialog = ProgressDialog.show(mActivity, "Hold on", "Connecting");// http://stackoverflow.com/a/11130220/1287554
+            mHandler.sendEmptyMessage(BluetoothSPP.BT_CONNECTING);
         }
 
         @Override
@@ -187,18 +181,14 @@ public class BluetoothSPP {
 
             if (!mConnectSuccessful) {
                 mHandler.sendEmptyMessage(BluetoothSPP.BT_NOT_CONNECTED);
-
-                Toast.makeText(mActivity, "Could not connect to device. Is it a Serial device? Also check if the UUID is correct in the settings", Toast.LENGTH_LONG).show();
             } else {
                 mHandler.sendEmptyMessage(BluetoothSPP.BT_CONNECTED);
 
-                Toast.makeText(mActivity, "Connected to device", Toast.LENGTH_LONG).show();
                 mIsBluetoothConnected = true;
                 mReadThread = new ReadInput(mBTSocket); // Kick off input reader
             }
 
             Log.e("Centurion", "Connected...");
-            progressDialog.dismiss();
         }
 
     }

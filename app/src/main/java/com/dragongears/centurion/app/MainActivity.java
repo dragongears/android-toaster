@@ -1,5 +1,7 @@
 package com.dragongears.centurion.app;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -10,12 +12,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.IOException;
 
 
 public class MainActivity extends ActionBarActivity {
+    final Context context = this;
     private BluetoothSPP mBTSPP;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,14 +36,12 @@ public class MainActivity extends ActionBarActivity {
         // Define and attach listeners
         toastButton.setOnClickListener(new View.OnClickListener()  {
             public void onClick(View v) {
-            try {
-                mBTSPP.write("t");
-//                ImageView img= (ImageView) findViewById(R.id.toasterImageView);
-//                img.setImageResource(R.drawable.ic_toast_down);
+                try {
+                    mBTSPP.write("t");
                 } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -89,10 +92,16 @@ public class MainActivity extends ActionBarActivity {
 
             ImageView img = (ImageView) findViewById(R.id.toasterImageView);
 
-            if (msg.what == BluetoothSPP.BT_CONNECTED) {
+            if (msg.what == BluetoothSPP.BT_CONNECTING) {
+                progressDialog = ProgressDialog.show(context, "Bluetooth SPP", "Connecting");// http://stackoverflow.com/a/11130220/1287554
+            } else if (msg.what == BluetoothSPP.BT_CONNECTED) {
                 img.setImageResource(R.drawable.ic_toast_up);
+                progressDialog.dismiss();
+                Toast.makeText(context, "Connected to device", Toast.LENGTH_LONG).show();
             } else if (msg.what == BluetoothSPP.BT_NOT_CONNECTED) {
                 img.setImageResource(R.drawable.ic_no_connection);
+                progressDialog.dismiss();
+                Toast.makeText(context, "Could not connect to device. Is it a Serial device? Also check if the UUID is correct in the settings", Toast.LENGTH_LONG).show();
             } else {
                 Log.i("Main Activity", "From toaster: " + ((char)msg.arg1));
                 char cmd = (char)msg.arg1;
