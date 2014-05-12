@@ -7,6 +7,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.widget.ImageView;
@@ -28,13 +30,17 @@ public class BluetoothSPP {
     private ReadInput mReadThread = null;
 
     private Activity mActivity;
+    private Handler mHandler;
     private ProgressDialog progressDialog;
 
-
-
     private static final int BT_ENABLE_REQUEST = 10; // This is the code we use for BT Enable
-    public BluetoothSPP (Activity act) {
+    public static final int BT_CONNECTED = 10;
+    public static final int BT_NOT_CONNECTED = 20;
+    public static final int BT_FROM_TOASTER = 30;
+
+    public void initialize(Activity act, Handler hnd) {
         mActivity = act;
+        mHandler = hnd;
         Log.e("Centurion", "Bluetooth getDefaultAdapter");
         mBTAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -48,7 +54,6 @@ public class BluetoothSPP {
             new SearchDevices().execute();
             Log.e("Centurion", "Search devices");
         }
-
     }
 
     public void write(String s) throws IOException {
@@ -100,9 +105,10 @@ public class BluetoothSPP {
             mDevice = dev;
 
             if (dev != null) {
-                if (mBTSocket == null || !mIsBluetoothConnected) {
-                    new ConnectBT().execute();
-                }
+                connect();
+//                if (mBTSocket == null || !mIsBluetoothConnected) {
+//                    new ConnectBT().execute();
+//                }
 
                 Log.e("Centurion", "Toaster found");
             } else {
@@ -178,14 +184,13 @@ public class BluetoothSPP {
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-//            ImageView img = (ImageView) findViewById(R.id.toasterImageView);
 
             if (!mConnectSuccessful) {
-//                img.setImageResource(R.drawable.ic_no_connection);
+                mHandler.sendEmptyMessage(BluetoothSPP.BT_NOT_CONNECTED);
 
                 Toast.makeText(mActivity, "Could not connect to device. Is it a Serial device? Also check if the UUID is correct in the settings", Toast.LENGTH_LONG).show();
             } else {
-//                img.setImageResource(R.drawable.ic_toast_up);
+                mHandler.sendEmptyMessage(BluetoothSPP.BT_CONNECTED);
 
                 Toast.makeText(mActivity, "Connected to device", Toast.LENGTH_LONG).show();
                 mIsBluetoothConnected = true;
@@ -195,8 +200,6 @@ public class BluetoothSPP {
             Log.e("Centurion", "Connected...");
             progressDialog.dismiss();
         }
-
-
 
     }
 
@@ -232,39 +235,13 @@ public class BluetoothSPP {
 						 * This is needed because new String(buffer) is taking the entire buffer i.e. 256 chars on Android 2.3.4 http://stackoverflow.com/a/8843462/1287554
 						 */
                         for (i = 0; i < buffer.length && buffer[i] != 0; i++) {
+                            Log.i("Input Stream", "From toaster: " + ((char)buffer[i]));
+                            Message msg = mHandler.obtainMessage();
+                            msg.what = BluetoothSPP.BT_FROM_TOASTER;
+                            msg.arg1 = buffer[i];
+                            mHandler.sendMessage(msg);
                         }
-                        final String strInput = new String(buffer, 0, i);
-
-						/*
-						 * If checked then receive text, better design would probably be to stop thread if unchecked and free resources, but this is a quick fix
-						 */
-
-//                        if (chkReceiveText.isChecked()) {
-//                            mTxtReceive.post(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    mTxtReceive.append(strInput);
-//                                    //Uncomment below for testing
-//                                    //mTxtReceive.append("\n");
-//                                    //mTxtReceive.append("Chars: " + strInput.length() + " Lines: " + mTxtReceive.getLineCount() + "\n");
-//
-//                                    int txtLength = mTxtReceive.getEditableText().length();
-//                                    if(txtLength > mMaxChars){
-//                                        mTxtReceive.getEditableText().delete(0, txtLength - mMaxChars);
-//                                    }
-//
-//                                    if (chkScroll.isChecked()) { // Scroll only if this is checked
-//                                        scrollView.post(new Runnable() { // Snippet from http://stackoverflow.com/a/4612082/1287554
-//                                            @Override
-//                                            public void run() {
-//                                                scrollView.fullScroll(View.FOCUS_DOWN);
-//                                            }
-//                                        });
-//                                    }
-//                                }
-//                            });
-//                        }
-
+//                        final String strInput = new String(buffer, 0, i);
                     }
                     Thread.sleep(500);
                 }

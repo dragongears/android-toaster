@@ -1,6 +1,8 @@
 package com.dragongears.centurion.app;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -21,21 +23,22 @@ public class MainActivity extends ActionBarActivity {
         Button toastButton;
         setContentView(R.layout.activity_main);
 
-        mBTSPP = new BluetoothSPP(this);
+        mBTSPP = new BluetoothSPP();
+        mBTSPP.initialize(this, messageHandler);
 
         toastButton = (Button)findViewById(R.id.toastButton);
 
         // Define and attach listeners
         toastButton.setOnClickListener(new View.OnClickListener()  {
             public void onClick(View v) {
-                try {
-                    mBTSPP.write("t");
-                    ImageView img= (ImageView) findViewById(R.id.toasterImageView);
-                    img.setImageResource(R.drawable.ic_toast_down);
-                    } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+            try {
+                mBTSPP.write("t");
+//                ImageView img= (ImageView) findViewById(R.id.toasterImageView);
+//                img.setImageResource(R.drawable.ic_toast_down);
+                } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             }
         });
 
@@ -79,5 +82,27 @@ public class MainActivity extends ActionBarActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private Handler messageHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            ImageView img = (ImageView) findViewById(R.id.toasterImageView);
+
+            if (msg.what == BluetoothSPP.BT_CONNECTED) {
+                img.setImageResource(R.drawable.ic_toast_up);
+            } else if (msg.what == BluetoothSPP.BT_NOT_CONNECTED) {
+                img.setImageResource(R.drawable.ic_no_connection);
+            } else {
+                Log.i("Main Activity", "From toaster: " + ((char)msg.arg1));
+                char cmd = (char)msg.arg1;
+                if (cmd == '+') {
+                    img.setImageResource(R.drawable.ic_toast_down);
+                } else if (cmd == '-') {
+                    img.setImageResource(R.drawable.ic_toast_up);
+                }
+            }
+        }
+    };
 
 }
