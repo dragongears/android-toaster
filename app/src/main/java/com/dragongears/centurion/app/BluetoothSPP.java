@@ -181,14 +181,15 @@ public class BluetoothSPP {
 
             if (!mConnectSuccessful) {
                 mHandler.sendEmptyMessage(BluetoothSPP.BT_NOT_CONNECTED);
+                Log.e("Centurion", "Connected...");
             } else {
                 mHandler.sendEmptyMessage(BluetoothSPP.BT_CONNECTED);
 
                 mIsBluetoothConnected = true;
                 mReadThread = new ReadInput(mBTSocket); // Kick off input reader
+                Log.e("Centurion", "Not connected...");
             }
 
-            Log.e("Centurion", "Connected...");
         }
 
     }

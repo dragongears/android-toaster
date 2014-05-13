@@ -92,6 +92,7 @@ public class MainActivity extends ActionBarActivity {
 
             ImageView img = (ImageView) findViewById(R.id.toasterImageView);
 
+// TODO: Case statements
             if (msg.what == BluetoothSPP.BT_CONNECTING) {
                 progressDialog = ProgressDialog.show(context, "Bluetooth SPP", "Connecting");// http://stackoverflow.com/a/11130220/1287554
             } else if (msg.what == BluetoothSPP.BT_CONNECTED) {
@@ -102,8 +103,9 @@ public class MainActivity extends ActionBarActivity {
                 img.setImageResource(R.drawable.ic_no_connection);
                 progressDialog.dismiss();
                 Toast.makeText(context, "Could not connect to device. Is it a Serial device? Also check if the UUID is correct in the settings", Toast.LENGTH_LONG).show();
-            } else {
+            } else if (msg.what == BluetoothSPP.BT_FROM_TOASTER) {
                 Log.i("Main Activity", "From toaster: " + ((char)msg.arg1));
+// TODO: Create function to handle commands from toaster
                 char cmd = (char)msg.arg1;
                 if (cmd == '+') {
                     img.setImageResource(R.drawable.ic_toast_down);
